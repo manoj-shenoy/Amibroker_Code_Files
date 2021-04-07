@@ -1,0 +1,201 @@
+/*======================================================
+		           CPR + PIVOT POINTS + VWAP
+  ======================================================*/
+
+// ======================= Heikin Ashi =============================
+HaClose = (O+H+L+C)/4; 
+HaOpen = AMA( Ref( HaClose, -1 ), 0.3 ); 
+HaHigh = Max( H, Max( HaClose, HaOpen ) ); 
+HaLow = Min( L, Min( HaClose, HaOpen ) ); 
+xDiff = (HaHigh - Halow) * IIf(StrFind(Name(),"JPY"),100,10000);
+barcolor = IIf(HaClose >= HaOpen,colorGreen,colorRed);
+PlotOHLC( HaOpen, HaHigh, HaLow, HaClose, "", barcolor, styleCandle ); 
+// Plot(EMA(HaClose,9),"",colorWhite, styleLine);
+// Plot(EMA(HaClose,18),"",colorBlack, styleLine);
+// ===================================================================
+
+
+// ======================= SECTION_BEGIN("Bollinger Bands") ========================;
+P = ParamField("Price field",-1);
+Periods = Param("Periods", 15, 2, 100, 1 );
+Width = Param("Width", 2, 0, 10, 0.05 );
+Color = ParamColor("Color", colorCycle );
+Style = ParamStyle("Style");
+BBTop = BBandTop( P, Periods, Width );
+BBBot = BBandBot( P, Periods, Width );
+Plot( BBandTop( P, Periods, Width ), "BBTop" + _PARAM_VALUES(), Color, Style ); 
+Plot( BBandBot( P, Periods, Width ), "BBBot" + _PARAM_VALUES(), Color, Style ); 
+// ==================================================================================
+
+
+// ================= SECTION_BEGIN("VWAP") =========================================
+/*
+The VWAP for a stock is calculated by adding the dollars traded for every
+transaction in that stock ("price" x "number of 
+      shares traded") and dividing the total shares traded. A VWAP is computed
+from the Open of the market to the market Close, AND is 
+      calculated by Volume weighting all transactions during this time period
+*/
+
+Bars_so_far_today = 1 + BarsSince( Day() != Ref(Day(), -1));
+StartBar = ValueWhen(TimeNum() == 093000, BarIndex());
+TodayVolume = Sum(V,Bars_so_far_today);
+IIf (BarIndex() >= StartBar, VWAP = Sum (C * V, Bars_so_far_today  ) /
+TodayVolume,0);
+Plot (VWAP,"VWAP",colorGold, styleThick);
+// =================================================================================
+
+
+
+//================== SECTION_BEGIN( "CENTRAL PIVOT RANGE" )=========================
+ dtDayStartComp = TimeFrameCompress( DateTime(), inDaily, compressOpen );
+ dtDayStartExp = TimeFrameExpand( dtDayStartComp, inDaily, expandFirst );
+ dtDayEndComp = TimeFrameCompress( DateTime(), inDaily, compressLast );
+ dtDayEndExp = TimeFrameExpand( dtDayEndComp, inDaily, expandFirst );
+ DayCond = DateTime() >= dtDayStartExp AND DateTime() < dtDayEndExp;	 
+ 
+ // Previous Days High Low Close
+ PDH =  TimeFrameGetPrice( "H", inDaily, -1 );
+ PDL =  TimeFrameGetPrice( "L", inDaily, -1 );
+ PDC =  TimeFrameGetPrice( "C", inDaily, -1 );
+ 
+ PPV = ( PDH + PDL + PDC ) / 3;
+ PLB = ( PDH + PDL ) / 2;
+ PUB = 2 * PPV - PLB;
+ 
+ Plot( IIf( DayCond, PUB, Null ), "PUB", colorAqua, styleLine, Null, Null, 0 );
+ Plot( IIf( DayCond, PUB, Null ), "PUB", colorAqua, styleLine, Null, Null, 2 );
+ 
+ Plot( IIf( DayCond, PPV, Null), "Pivot", colorAqua, styleLine, Null, Null, 0 );
+ Plot( IIf( DayCond, PPV, Null), "Pivot", colorAqua, styleLine, Null, Null, 2 );
+ 
+ Plot( IIf( DayCond, PLB, Null), "PLB", colorAqua, styleLine, Null, Null, 0 );
+ Plot( IIf( DayCond, PLB, Null), "PLB", colorAqua, styleLine, Null, Null, 2 );
+// ===================================================================================
+
+// SECTION_BEGIN( "Pivot Levels" );
+ //PDH =  TimeFrameGetPrice( "H", inDaily, -1 );
+ //PDL =  TimeFrameGetPrice( "L", inDaily, -1 );
+ //PDC =  TimeFrameGetPrice( "C", inDaily, -1 );
+
+ //PV = ( PDH + PDL + PDC ) / 3;
+ R1 = 2 * PPV - PDL;
+ R2 = PPV + PDH - PDL;
+ S1 = 2 * PPV - PDH;
+ S2 = PPV - PDH + PDL;
+
+ Plot( IIf( DayCond, R1, Null ), "R1", colorRed, styleLine, Null, Null, 0 );
+ Plot( IIf( DayCond, R1, Null ), "R1", colorRed, styleLine, Null, Null, 2 );
+ 
+ Plot( IIf( DayCond, R2, Null ), "R2", colorOrange, styleLine, Null, Null, 0 );
+ Plot( IIf( DayCond, R2, Null ), "R2", colorOrange, styleLine, Null, Null, 2 );
+ 
+ Plot( IIf( DayCond, S1, Null ), "S1", colorGreen, styleLine, Null, Null, 0 );
+ Plot( IIf( DayCond, S1, Null ), "S1", colorGreen, styleLine, Null, Null, 2 );
+ 
+ Plot( IIf( DayCond, S2, Null ), "S2", colorLime, styleLine, Null, Null, 0 );
+ Plot( IIf( DayCond, S2, Null ), "S2", colorLime, styleLine, Null, Null, 2 );
+
+// ================================================================================================
+/*
+_SECTION_BEGIN( "Price1" );
+	 SetChartOptions( 0, chartShowArrows | chartShowDates );
+	 _N( Title = StrFormat( "{{NAME}} - {{INTERVAL}} {{DATE}} Open %g, Hi %g, Lo %g, Close %g (%.1f%%) {{VALUES}}", O, H, L, C, SelectedValue( ROC( C, 1 ) ) ) );
+	 Plot( C, "Close", ParamColor( "Color", colorDefault ), styleNoTitle | ParamStyle( "Style" ) | GetPriceStyle() );
+_SECTION_END();
+*/
+
+
+// ===============SECTION_BEGIN( "To view Pivots of Next Day as Today closes" ) ====================;
+ shift = 10; //Number of Bars to be shifted, could use a Param if needed
+ bi = BarIndex();
+ lvbi = LastValue( bi );
+ LAx0 = lvbi - shift + 1;
+ LAx1 = lvbi;
+ 
+ // Present Days High Low Close
+ // These levels will be dynamic as day progresses and would ahow up in the no bar region after the last visible Bar for shifted number of bars (i.e. 10 in this case)
+ // Do use "Bar Replay" to figure out what I mean
+ dH = TimeFrameGetPrice( "H", inDaily, 0 );
+ dL = TimeFrameGetPrice( "L", inDaily, 0 );
+ dC = TimeFrameGetPrice( "C", inDaily, 0 );
+ 
+ //Central Pivots shifted for Next Day
+ dPV = ( dH + dL + dC ) / 3;
+ LB = ( dH + dL ) / 2;
+ UB = 2 * dPV - LB;	 
+ 
+ y = LastValue( dPV );
+ la = LineArray( LAx0, y, LAx1, y );
+ Plot( la, "PV", colorAqua, styleLine, Null, Null, shift );
+ 
+ y = LastValue( LB );
+ la = LineArray( LAx0, y, LAx1, y );
+ Plot( la, "LB", colorAqua, styleLine, Null, Null, shift );
+ 
+ y = LastValue( UB );
+ la = LineArray( LAx0, y, LAx1, y );
+ Plot( la, "UB", colorAqua, styleLine, Null, Null, shift );
+ 
+ //Pivot Levels shifted for Next Day
+ R1 = 2 * dPV - dL;
+ R2 = dPV + dH - dL;
+ S1 = 2 * dPV - dH;
+ S2 = dPV - dH + dL;
+ 
+ y = LastValue( R1 );
+ la = LineArray( LAx0, y, LAx1, y );
+ Plot( la, "R1", colorRed, styleLine, Null, Null, shift );
+ 
+ y = LastValue( R2 );
+ la = LineArray( LAx0, y, LAx1, y );
+ Plot( la, "R2", colorOrange, styleLine, Null, Null, shift );
+ 
+ y = LastValue( S1 );
+ la = LineArray( LAx0, y, LAx1, y );
+ Plot( la, "S1", colorGreen, styleLine, Null, Null, shift );
+ 
+ y = LastValue( S2 );
+ la = LineArray( LAx0, y, LAx1, y );
+ Plot( la, "S2", colorLime, styleLine, Null, Null, shift );
+
+// ===================================================================================
+
+NRThreshold = 0.01;
+NarrowRangeCond = (abs(PUB-PLB)/PDC)<NRThreshold;
+
+/*
+// =================================== BUY CONDITION ====================================== //
+
+// Buysetup is when Current Lower Bound of PCR (LB) > Yesterdays Upper Bound of PCR
+// and Daily Close is within 0.5% of Daily High and Current PCR is Narrow
+
+// Buy Condition is when Buysetup is true and
+// Close > VWAP and Close > Current Upper Bound of PCR and Heiken Ashi Candle Crossover against Bollinger Band
+*/
+buysetup = LB > PUB AND (abs((PDH/PDC)-1) < 0.01) AND NarrowRangeCond;
+
+Buy = buysetup AND C > VWAP AND C > UB AND Cross(C,BBTop);
+
+// ======================================================================================= //
+
+
+/*
+// ================================= SELL CONDITION ======================================== //
+
+// Sellsetup is when Current Upper Bound of PCR (UB) < Yesterdays Lower Bound of PCR
+// and Daily Close is within 0.5% of Daily High and Current PCR is Narrow
+*/
+sellsetup = UB < PLB AND (abs((PDC/PDL)-1) < 0.01) AND NarrowRangeCond;
+
+Sell = sellsetup AND C < VWAP AND C < LB AND Cross(C,BBBot); 
+
+// ========================================================================================= //
+
+
+
+/* Plot Buy and Sell Signal Arrows */
+shape = Buy * shapeUpArrow + Sell * shapeDownArrow;
+PlotShapes( shape, IIf( Buy, colorLavender, colorLime ), 0, IIf( Buy, Low, High ) );
+GraphXSpace = 5; 
+
