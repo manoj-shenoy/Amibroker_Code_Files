@@ -173,9 +173,9 @@ NarrowRangeCond = (abs(UB-LB)/PDC)<NRThreshold;
 // Buy Condition is when Buysetup is true and
 // Close > VWAP and Close > Current Upper Bound of PCR and Heiken Ashi Candle Crossover against Bollinger Band
 */
-buysetup = LB > PUB AND (abs((PDH/PDC)-1) < 0.01) AND NarrowRangeCond;
+buysetup = PLB > Ref(PUB,-1) AND (abs((PDH/PDC)-1) < 0.02) AND NarrowRangeCond;
 
-Buy = buysetup AND C > VWAP AND C > UB AND Cross(C,BBTop);
+Buy = buysetup AND C > VWAP AND C > PUB AND Cross(C,BBTop);
 
 // ======================================================================================= //
 
@@ -186,9 +186,9 @@ Buy = buysetup AND C > VWAP AND C > UB AND Cross(C,BBTop);
 // Sellsetup is when Current Upper Bound of PCR (UB) < Yesterdays Lower Bound of PCR
 // and Daily Close is within 0.5% of Daily High and Current PCR is Narrow
 */
-sellsetup = UB < PLB AND (abs((PDC/PDL)-1) < 0.01) AND NarrowRangeCond;
+sellsetup = PUB < Ref(PLB,-1) AND (abs((PDC/PDL)-1) < 0.02) AND NarrowRangeCond;
 
-Sell = sellsetup AND C < VWAP AND C < LB AND Cross(C,BBBot); 
+Sell = sellsetup AND C < VWAP AND C < PLB AND Cross(C,BBBot); 
 
 // ========================================================================================= //
 
