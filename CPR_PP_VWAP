@@ -196,6 +196,6 @@ Sell = sellsetup AND C < VWAP AND C < LB AND Cross(C,BBBot);
 
 /* Plot Buy and Sell Signal Arrows */
 shape = Buy * shapeUpArrow + Sell * shapeDownArrow;
-PlotShapes( shape, IIf( Buy, colorLavender, colorLime ), 0, IIf( Buy, Low, High ) );
+PlotShapes( shape, IIf( Buy, colorBlue, colorGold ), 0, IIf( Buy, Low, High ) );
 GraphXSpace = 5; 
 
