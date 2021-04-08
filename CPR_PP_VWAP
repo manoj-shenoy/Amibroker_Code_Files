@@ -1,5 +1,5 @@
 /*======================================================
-		 CPR + PIVOT POINTS + VWAP
+		       CPR + PIVOT POINTS + VWAP
   ======================================================*/
 
 // ======================= Heikin Ashi =============================
@@ -59,18 +59,18 @@ Plot (VWAP,"VWAP",colorGold, styleThick);
  PDL =  TimeFrameGetPrice( "L", inDaily, -1 );
  PDC =  TimeFrameGetPrice( "C", inDaily, -1 );
  
- PPV = ( PDH + PDL + PDC ) / 3;
- PLB = ( PDH + PDL ) / 2;
- PUB = 2 * PPV - PLB;
+ Today_PV = ( PDH + PDL + PDC ) / 3;
+ Today_LB = ( PDH + PDL ) / 2;
+ Today_UB = 2 * Today_PV - Today_LB;
  
- Plot( IIf( DayCond, PUB, Null ), "PUB", colorAqua, styleLine, Null, Null, 0 );
- Plot( IIf( DayCond, PUB, Null ), "PUB", colorAqua, styleLine, Null, Null, 2 );
+ Plot( IIf( DayCond, Today_UB, Null ), "Today_UB", colorAqua, styleLine, Null, Null, 0 );
+ Plot( IIf( DayCond, Today_UB, Null ), "Today_UB", colorAqua, styleLine, Null, Null, 2 );
  
- Plot( IIf( DayCond, PPV, Null), "Pivot", colorAqua, styleLine, Null, Null, 0 );
- Plot( IIf( DayCond, PPV, Null), "Pivot", colorAqua, styleLine, Null, Null, 2 );
+ Plot( IIf( DayCond, Today_PV, Null), "Pivot", colorAqua, styleLine, Null, Null, 0 );
+ Plot( IIf( DayCond, Today_PV, Null), "Pivot", colorAqua, styleLine, Null, Null, 2 );
  
- Plot( IIf( DayCond, PLB, Null), "PLB", colorAqua, styleLine, Null, Null, 0 );
- Plot( IIf( DayCond, PLB, Null), "PLB", colorAqua, styleLine, Null, Null, 2 );
+ Plot( IIf( DayCond, Today_LB, Null), "Today_LB", colorAqua, styleLine, Null, Null, 0 );
+ Plot( IIf( DayCond, Today_LB, Null), "Today_LB", colorAqua, styleLine, Null, Null, 2 );
 // ===================================================================================
 
 // SECTION_BEGIN( "Pivot Levels" );
@@ -79,10 +79,10 @@ Plot (VWAP,"VWAP",colorGold, styleThick);
  //PDC =  TimeFrameGetPrice( "C", inDaily, -1 );
 
  //PV = ( PDH + PDL + PDC ) / 3;
- R1 = 2 * PPV - PDL;
- R2 = PPV + PDH - PDL;
- S1 = 2 * PPV - PDH;
- S2 = PPV - PDH + PDL;
+ R1 = 2 * Today_PV - PDL;
+ R2 = Today_PV + PDH - PDL;
+ S1 = 2 * Today_PV - PDH;
+ S2 = Today_PV - PDH + PDL;
 
  Plot( IIf( DayCond, R1, Null ), "R1", colorRed, styleLine, Null, Null, 0 );
  Plot( IIf( DayCond, R1, Null ), "R1", colorRed, styleLine, Null, Null, 2 );
@@ -161,21 +161,21 @@ _SECTION_END();
 
 // ===================================================================================
 
-NRThreshold = 0.02;
-NarrowRangeCond = (abs(UB-LB)/PDC)<NRThreshold;
+NRThreshold = 0.05;
+NarrowRangeCond = abs(Today_UB-Today_LB)/PDC < NRThreshold;
 
 /*
 // =================================== BUY CONDITION ====================================== //
 
 // Buysetup is when Current Lower Bound of PCR (LB) > Yesterdays Upper Bound of PCR
-// and Daily Close is within 0.5% of Daily High and Current PCR is Narrow
+// and Prev Daily Close is within 0.5% of Prev Daily High and Current PCR is Narrow
 
 // Buy Condition is when Buysetup is true and
 // Close > VWAP and Close > Current Upper Bound of PCR and Heiken Ashi Candle Crossover against Bollinger Band
 */
-buysetup = PLB > Ref(PUB,-1) AND (abs((PDH/PDC)-1) < 0.02) AND NarrowRangeCond;
+buysetup = Today_LB > Ref(Today_UB,-1) AND (abs((PDH/PDC)-1) < 0.02) AND NarrowRangeCond;
 
-Buy = buysetup AND C > VWAP AND C > PUB AND Cross(C,BBTop);
+Buy = buysetup AND C > VWAP AND C > Today_UB; // AND Cross(C,BBTop)
 
 // ======================================================================================= //
 
@@ -186,9 +186,9 @@ Buy = buysetup AND C > VWAP AND C > PUB AND Cross(C,BBTop);
 // Sellsetup is when Current Upper Bound of PCR (UB) < Yesterdays Lower Bound of PCR
 // and Daily Close is within 0.5% of Daily High and Current PCR is Narrow
 */
-sellsetup = PUB < Ref(PLB,-1) AND (abs((PDC/PDL)-1) < 0.02) AND NarrowRangeCond;
+sellsetup = Today_UB < Ref(Today_LB,-1) AND (abs((PDC/PDL)-1) < 0.02) AND NarrowRangeCond;
 
-Sell = sellsetup AND C < VWAP AND C < PLB AND Cross(C,BBBot); 
+Sell = sellsetup AND C < VWAP AND C < Today_LB; // AND Cross(C,BBBot)
 
 // ========================================================================================= //
 
