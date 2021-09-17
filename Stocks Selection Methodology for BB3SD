@@ -1,0 +1,12 @@
+Try different ways to identify top (n) number of highest momemtum stocks every (x) number of weeks. (n) and (x) have to be chosen and finalized. One way to identify highest momentum stocks is by performing time series regression on each stock's daily close price over the last 2 or 3 months and putting the list in order by slope of the regression lines. This would tell us the stocks with largest uptrends. Other ways to identify top momentum stocks need to be explored.
+
+
+Backtest: 
+
+1. Go back 10-15 years with intraday and daily stocks data. Look at daily stock prices with proper filters: high volume, uptrending for the last 60-90 days (using method described above or one yet to be determined), fairly low volatility (stocks that are mostly uptrending daily are preferable as this strategy will be long only).
+2. After subset of stocks is selected, optimize BB3SD system on them for the last 3 months. Then forward test on 5 min data with optimized parameters for the next 2 weeks or 1 month. 
+3. Redo the process in above steps every 2 weeks (this length of time could be subject to change as well)
+
+Goal: Keep collecting overall trades and portfolio performance from 2005 until now by repeating the process described. To reiterate the process: identify a subset recently trending/LOW volatility/good volume stocks via daily data over the last 3 or so months... -> optimize BB3SD system on all stocks in this subset -> Forward test on 5 min data for the next 2-4 weeks. Repeat the process (3 months optimization/2 weeks forward test) from 2005 until you reach present day. 
+
+**Note: As subset of stocks will keep changing from time to time, the overall list of trades need to be logged and portfolio equity curve needs to be calculated from this over the 15 years backtest period.
