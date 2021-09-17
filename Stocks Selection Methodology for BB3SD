@@ -10,3 +10,12 @@ Backtest:
 Goal: Keep collecting overall trades and portfolio performance from 2005 until now by repeating the process described. To reiterate the process: identify a subset recently trending/LOW volatility/good volume stocks via daily data over the last 3 or so months... -> optimize BB3SD system on all stocks in this subset -> Forward test on 5 min data for the next 2-4 weeks. Repeat the process (3 months optimization/2 weeks forward test) from 2005 until you reach present day. 
 
 **Note: As subset of stocks will keep changing from time to time, the overall list of trades need to be logged and portfolio equity curve needs to be calculated from this over the 15 years backtest period.
+
+
+
+Variables that needto be properly chosen:
+
+1. Number of top trending stocks to select in subset (need to fit all criteria described in step 1)
+2. Lookback period for identifying momentum
+3. Forward testing period based on backtest/optimization period lookback
+4. How often to redo the process (arbitrarily 2 weeks for now)
