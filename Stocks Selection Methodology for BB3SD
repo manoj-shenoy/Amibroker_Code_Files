@@ -13,7 +13,7 @@ Goal: Keep collecting overall trades and portfolio performance from 2005 until n
 
 
 
-Variables that needto be properly chosen:
+Variables that need to be properly chosen:
 
 1. Number of top trending stocks to select in subset (need to fit all criteria described in step 1)
 2. Lookback period for identifying momentum
